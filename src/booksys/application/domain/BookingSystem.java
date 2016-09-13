@@ -167,7 +167,9 @@ public class BookingSystem
 	  && startTime.before(b.getEndTime())
 	  && endTime.after(b.getTime())) {
 	doubleBooked = true ;
-	observerMessage("Double booking!", false) ;
+	if(observerMessage("Double booking! Would you like to go on the waiting list?", true)){
+		//Add to waiting list
+	}
       }
     }
     return doubleBooked ;
