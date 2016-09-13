@@ -94,7 +94,8 @@ public class BookingMapper
 		  + covers + "', '"
 		  + date + "', '"
 		  + time + "', '"
-		  + ((PersistentTable) table).getId() + "', '"
+		  + (table == null ? 0 :
+		    ((PersistentTable) table).getId()) + "', '"
 		  + ((PersistentCustomer) customer).getId() + "', "
 		  + (arrivalTime == null ? "NULL" :
 		     ("'" + arrivalTime.toString() + "'"))

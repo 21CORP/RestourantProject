@@ -80,9 +80,15 @@ public class BookingSystem
   public void makeReservation(int covers, Date date, Time time, int tno,
 			      String name, String phone)
   {
-    if (!doubleBooked(time, tno, null) && !overflow(tno, covers)) {
-      Booking b
-	= restaurant.makeReservation(covers, date, time, tno, name, phone) ;
+    if (!overflow(tno, covers)) {
+      Booking b;
+      if (doubleBooked(time, tno, null)) {
+        if (confirmDoubleBook()) {
+          b = restaurant.makeQueuedReservation(covers, date, time, name, phone) ;
+        } else { return ; }
+      } else {
+        b = restaurant.makeReservation(covers, date, time, tno, name, phone) ;
+      }
       currentBookings.addElement(b) ;
       notifyObservers() ;
     }
@@ -117,10 +123,16 @@ public class BookingSystem
   {
     if (selectedBooking != null) {
       if (observerMessage("Are you sure?", true)) {
-	currentBookings.remove(selectedBooking) ;
-	restaurant.removeBooking(selectedBooking) ;
-	selectedBooking = null ;
-	notifyObservers() ;
+        Vector queueForSlot = restaurant.getQueue(selectedBooking.getDate(), selectedBooking.getTime()) ;
+      	currentBookings.remove(selectedBooking) ;
+      	restaurant.removeBooking(selectedBooking) ;
+      	selectedBooking = null ;
+      	
+      	if (!queueForSlot.isEmpty()) {
+      	  observerMessage(queueForSlot.toString(), true) ;
+      	}
+      	
+      	notifyObservers() ;
       }
     }
   }
@@ -139,7 +151,7 @@ public class BookingSystem
     }
   }
 
-  public void transfer(Time time, int tno)
+  public boolean transfer(Time time, int tno)
   {
     if (selectedBooking != null) {
       if (selectedBooking.getTableNumber() != tno) {
@@ -150,29 +162,43 @@ public class BookingSystem
 	}
       }
       notifyObservers() ;
+      return true ;
+    }
+    return false ;
+  }
+  
+  public void dequeueReservation(int tno) {
+    if (selectedBooking != null && selectedBooking.getTable() == null) {
+      try {
+        Reservation r = (Reservation) selectedBooking ;
+        Time time = r.getTime() ;
+        if (transfer(time, tno) ) {
+          restaurant.dequeue(r) ;
+        }
+      } catch (Exception e) {}
     }
   }
   
   private boolean doubleBooked(Time startTime, int tno, Booking ignore)
   {
-    boolean doubleBooked = false ;
 
     Time endTime = (Time) startTime.clone() ;
     endTime.setHours(endTime.getHours() + 2) ;
     
     Enumeration<Booking> enumeration = currentBookings.elements();
-    while (!doubleBooked && enumeration.hasMoreElements()) {
+    while (enumeration.hasMoreElements()) {
       Booking b = (Booking) enumeration.nextElement() ;
       if (b != ignore && b.getTableNumber() == tno
-	  && startTime.before(b.getEndTime())
-	  && endTime.after(b.getTime())) {
-	doubleBooked = true ;
-	if(observerMessage("Double booking! Would you like to go on the waiting list?", true)){
-		//Add to waiting list
-	}
+          && startTime.before(b.getEndTime())
+          && endTime.after(b.getTime())) {
+        return true;
       }
     }
-    return doubleBooked ;
+    return false ;
+  }
+  
+  private boolean confirmDoubleBook() {
+    return observerMessage("Double booking! Would you like to go on the waiting list?", true);
   }
   
   private boolean overflow(int tno, int covers)
