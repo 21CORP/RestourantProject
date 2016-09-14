@@ -12,6 +12,9 @@ import java.sql.Date ;
 import java.sql.Time ;
 import java.util.* ;
 
+import booksys.application.persistency.PersistentQueuedReservation;
+import booksys.presentation.QueuedReservationsDialog;
+
 public class BookingSystem
 {
   // Attributes:
@@ -128,17 +131,18 @@ public class BookingSystem
         Time time = selectedBooking.getTime() ;
       	currentBookings.remove(selectedBooking) ;
       	restaurant.removeBooking(selectedBooking) ;
-      	selectedBooking = null ;
-
-        Vector queueForSlot = restaurant.getQueue(today, time) ;
-      	if (!queueForSlot.isEmpty()) {
-      	  String queueList = "";
-      	  for (int i = 0; i < queueForSlot.size(); i++) {
-      	    queueList += ((QueuedReservation) queueForSlot.get(i)).getDetails() + ";";
-      	  }
-      	  observerMessage(queueList, true) ;
-      	}
       	
+
+        Vector<PersistentQueuedReservation> queueForSlot = restaurant.getQueue(today, time) ;
+      	if (!queueForSlot.isEmpty()) {
+      		QueuedReservationsDialog diag = new QueuedReservationsDialog(null, queueForSlot);
+      		diag.setVisible(true);
+      		if(diag.getAcceptee()!=null)
+      		{
+      			restaurant.dequeue(diag.getAcceptee(), selectedBooking.getTableNumber());
+      		}
+      	}
+      	selectedBooking = null ;
       	notifyObservers() ;
       }
     }
