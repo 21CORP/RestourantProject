@@ -85,12 +85,14 @@ public class BookingSystem
       if (doubleBooked(time, tno, null)) {
         if (confirmDoubleBook()) {
           b = restaurant.makeQueuedReservation(covers, date, time, name, phone) ;
-        } else { return ; }
-      } else {
-        b = restaurant.makeReservation(covers, date, time, tno, name, phone) ;
+        }
+        else { return ; }
       }
-      currentBookings.addElement(b) ;
-      notifyObservers() ;
+      else {
+        b = restaurant.makeReservation(covers, date, time, tno, name, phone) ;
+        currentBookings.addElement(b) ;
+        notifyObservers() ;
+      }
     }
   }
  
@@ -123,13 +125,18 @@ public class BookingSystem
   {
     if (selectedBooking != null) {
       if (observerMessage("Are you sure?", true)) {
-        Vector queueForSlot = restaurant.getQueue(selectedBooking.getDate(), selectedBooking.getTime()) ;
+        Time time = selectedBooking.getTime() ;
       	currentBookings.remove(selectedBooking) ;
       	restaurant.removeBooking(selectedBooking) ;
       	selectedBooking = null ;
-      	
+
+        Vector queueForSlot = restaurant.getQueue(today, time) ;
       	if (!queueForSlot.isEmpty()) {
-      	  observerMessage(queueForSlot.toString(), true) ;
+      	  String queueList = "";
+      	  for (int i = 0; i < queueForSlot.size(); i++) {
+      	    queueList += ((QueuedReservation) queueForSlot.get(i)).getDetails() + " ||| ";
+      	  }
+      	  observerMessage(queueList, true) ;
       	}
       	
       	notifyObservers() ;
@@ -168,14 +175,8 @@ public class BookingSystem
   }
   
   public void dequeueReservation(int tno) {
-    if (selectedBooking != null && selectedBooking.getTable() == null) {
-      try {
-        Reservation r = (Reservation) selectedBooking ;
-        Time time = r.getTime() ;
-        if (transfer(time, tno) ) {
-          restaurant.dequeue(r) ;
-        }
-      } catch (Exception e) {}
+    if (selectedBooking != null && selectedBooking instanceof QueuedReservation) {
+      restaurant.dequeue((QueuedReservation) selectedBooking, tno);
     }
   }
   

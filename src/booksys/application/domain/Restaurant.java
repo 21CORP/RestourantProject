@@ -16,7 +16,6 @@ import java.util.Vector ;
 
 class Restaurant
 {
-  WaitingList    wl = WaitingList.getInstance() ;
   BookingMapper  bm = BookingMapper.getInstance() ;
   CustomerMapper cm = CustomerMapper.getInstance() ;
   TableMapper    tm = TableMapper.getInstance() ;
@@ -55,10 +54,9 @@ class Restaurant
              String name, String phone)
   {
     Customer c = getCustomer(name, phone) ;
-    Reservation r = bm.createReservation(covers, date, time, null, c, null) ;
-    wl.add(r) ;
+    QueuedReservation qr = bm.createQueuedReservation(covers, date, time, c) ;
     
-    return r ;
+    return qr ;
   }
   
 
@@ -77,12 +75,19 @@ class Restaurant
   public void removeBooking(Booking b) {
     bm.deleteBooking(b) ;
   }
-
-  public void dequeue(Reservation r) {
-    wl.remove(r) ;
+  
+  public void dequeue(QueuedReservation qr, int tno) {
+    int cover = qr.getCovers() ;
+    Date date = qr.getDate() ;
+    Time time = qr.getTime() ;
+    String nm = qr.getCustomer().getName() ;
+    String ph = qr.getCustomer().getPhoneNumber() ;
+    
+    Reservation r = (Reservation) makeReservation(cover, date, time, tno, nm, ph) ;
+    removeBooking(qr);
   }
   
-  public Vector<Reservation> getQueue(Date date, Time time) {
-    return wl.getQueue(date, time) ;
+  public Vector getQueue(Date date, Time time) {
+    return bm.getWaitingList(date, time) ;
   }
 }

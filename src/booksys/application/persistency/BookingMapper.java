@@ -10,6 +10,8 @@ package booksys.application.persistency ;
 
 import booksys.application.domain.Booking ;
 import booksys.application.domain.Reservation ;
+import booksys.application.domain.QueuedReservation ;
+import booksys.application.domain.WalkIn ;
 import booksys.application.domain.Customer ;
 import booksys.application.domain.Table ;
 import booksys.storage.* ;
@@ -81,6 +83,34 @@ public class BookingMapper
     return v ;
   }
   
+  public Vector getWaitingList(Date date, Time time) {
+    Vector v = new Vector() ;
+    try
+    {
+      Statement stmt
+        = Database.getInstance().getConnection().createStatement() ;
+      ResultSet rset = stmt.executeQuery("SELECT * FROM QueuedReservation WHERE date='"
+        + date + "' AND time='" + time + "'") ;
+      while (rset.next()) {
+        int oid = rset.getInt(1) ;
+        int covers = rset.getInt(2) ;
+        Date bdate = rset.getDate(3) ;
+        Time btime = rset.getTime(4) ;
+        int cust = rset.getInt(5) ;
+        PersistentCustomer c =
+           CustomerMapper.getInstance().getCustomerForOid(cust) ;
+        PersistentQueuedReservation w
+          = new PersistentQueuedReservation(oid, covers, bdate, btime, c) ;
+        v.add(w) ;
+        }
+        rset.close() ;
+        stmt.close() ;
+    } catch (SQLException e) {
+      e.printStackTrace() ;
+    }
+    return v ;
+ }
+  
   public PersistentReservation createReservation(int covers,
 						 Date date,
 						 Time time,
@@ -108,6 +138,28 @@ public class BookingMapper
 				     customer,
 				     arrivalTime) ;
   } 
+
+  
+  public PersistentQueuedReservation createQueuedReservation(int covers,
+             Date date,
+             Time time,
+             Customer customer)
+  {
+    int oid = Database.getInstance().getId() ;
+    performUpdate("INSERT INTO QueuedReservation " + "VALUES ('"
+      + oid + "', '"
+      + covers + "', '"
+      + date + "', '"
+      + time + "', '"
+      + ((PersistentCustomer) customer).getId() + "'"
+      + ")" ) ;
+    return new PersistentQueuedReservation(oid,
+             covers,
+             date,
+             time,
+             customer) ;
+  } 
+  
   
   public PersistentWalkIn createWalkIn(int covers,
 				       Date date,
@@ -162,7 +214,12 @@ public class BookingMapper
   
   public void deleteBooking(Booking b)
   {
-    String table = b instanceof Reservation ? "Reservation" : "WalkIn" ;
+    //String table = b instanceof Reservation ? "Reservation" : "WalkIn" ;
+    //String table = b.getClass().getName() ;
+    String table = "";
+    if (b instanceof Reservation) { table = "Reservation"; }
+    else if (b instanceof WalkIn) { table = "WalkIn"; }
+    else if (b instanceof QueuedReservation) { table = "QueuedReservation"; }
     performUpdate("DELETE FROM " + table + " WHERE oid = '"
 		  + ((PersistentBooking) b).getId() + "'" ) ;
   }
