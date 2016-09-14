@@ -22,7 +22,7 @@ public class QueuedReservationsDialog extends Dialog {
 	private Button[] buttons;
 	private Vector<PersistentQueuedReservation> entries;
 	public QueuedReservationsDialog(Dialog owner, Vector<PersistentQueuedReservation> entries) {
-		super(owner, "Please ");
+		super(owner, "Please select a queued costumer");
 		this.entries = entries;
 		buttons = new Button[entries.size()];
 		Setup();
