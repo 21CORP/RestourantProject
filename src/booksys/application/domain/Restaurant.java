@@ -82,9 +82,10 @@ class Restaurant
     Time time = qr.getTime() ;
     String nm = qr.getCustomer().getName() ;
     String ph = qr.getCustomer().getPhoneNumber() ;
-    
-    Reservation r = (Reservation) makeReservation(cover, date, time, tno, nm, ph) ;
     removeBooking(qr);
+    //We call this to make it update the view as well
+    BookingSystem.getInstance().makeReservation(cover, date, time, tno, nm, ph) ;
+   
   }
   
   public Vector<PersistentQueuedReservation> getQueue(Date date, Time time) {
