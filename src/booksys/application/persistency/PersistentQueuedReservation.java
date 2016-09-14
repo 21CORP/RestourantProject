@@ -6,7 +6,7 @@ package booksys.application.persistency ;
 
 import booksys.application.domain.* ;
 
-class PersistentQueuedReservation
+public class PersistentQueuedReservation
   extends QueuedReservation implements PersistentBooking
 {
   private int oid ;

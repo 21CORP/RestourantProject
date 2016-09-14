@@ -87,7 +87,7 @@ class Restaurant
     removeBooking(qr);
   }
   
-  public Vector getQueue(Date date, Time time) {
+  public Vector<PersistentQueuedReservation> getQueue(Date date, Time time) {
     return bm.getWaitingList(date, time) ;
   }
 }

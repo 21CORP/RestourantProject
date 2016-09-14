@@ -83,8 +83,8 @@ public class BookingMapper
     return v ;
   }
   
-  public Vector getWaitingList(Date date, Time time) {
-    Vector v = new Vector() ;
+  public Vector<PersistentQueuedReservation> getWaitingList(Date date, Time time) {
+    Vector<PersistentQueuedReservation> v = new Vector() ;
     try
     {
       Statement stmt
