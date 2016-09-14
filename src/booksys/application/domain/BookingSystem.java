@@ -134,7 +134,7 @@ public class BookingSystem
       	if (!queueForSlot.isEmpty()) {
       	  String queueList = "";
       	  for (int i = 0; i < queueForSlot.size(); i++) {
-      	    queueList += ((QueuedReservation) queueForSlot.get(i)).getDetails() + " ||| ";
+      	    queueList += ((QueuedReservation) queueForSlot.get(i)).getDetails() + ";";
       	  }
       	  observerMessage(queueList, true) ;
       	}
