@@ -1,8 +1,10 @@
-DROP DATABASE booksys ;
-
-CREATE DATABASE booksys ;
-
-USE booksys ;
+USE RESTOURANT;
+DROP TABLE IF EXISTS QueuedReservation;
+DROP TABLE IF EXISTS Reservation;
+DROP TABLE IF EXISTS WalkIn;
+DROP TABLE IF EXISTS Customer;
+DROP TABLE IF EXISTS `table`;
+DROP TABLE IF EXISTS Oid;
 
 CREATE TABLE Oid (
        last_id	    INT NOT NULL
@@ -37,6 +39,13 @@ CREATE TABLE Reservation (
        customer_id  int,
        arrivalTime  TIME
 ) ;
+
+CREATE TABLE QueuedReservation (
+       oid	    int NOT NULL PRIMARY KEY,
+       covers	    int,
+       date	    DATE,
+       time	    TIME,
+       customer_id  int);
 
 INSERT INTO Oid VALUES (0) ;
 
