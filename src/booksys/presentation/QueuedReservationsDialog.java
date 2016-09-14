@@ -19,13 +19,20 @@ public class QueuedReservationsDialog extends Dialog {
 //		}
 //	}
 	private PersistentQueuedReservation acceptee;
+	private Button[] buttons;
 	private Vector<PersistentQueuedReservation> entries;
 	public QueuedReservationsDialog(Dialog owner, Vector<PersistentQueuedReservation> entries) {
 		super(owner, "Please ");
 		this.entries = entries;
-		setModal(true);
+		buttons = new Button[entries.size()];
 		Setup();
-		
+		addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e) {
+				QueuedReservationsDialog.this.setTitle("Please select a customer!");
+				QueuedReservationsDialog.this.setVisible(true);
+			}
+		}) ;
+		this.setModal(true);
 		
 	}
 	
